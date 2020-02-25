@@ -14,10 +14,11 @@ import (
 )
 
 var (
-	iv     = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	action int
-	key    []byte
-	dir    string
+	ignoreFiles = []string{"readme.md"}
+	iv          = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	action      int
+	key         []byte
+	dir         string
 )
 
 func init() {
@@ -27,6 +28,7 @@ func init() {
 }
 
 func main() {
+	ignoreFiles = append(ignoreFiles, os.Args[0])
 	counter := 0
 	fileLists, err := ListDir(dir)
 	if err != nil {
@@ -161,10 +163,23 @@ func ListDir(folder string) (list []string, err error) {
 	return list, nil
 }
 
+//CheckFile 返回true的文件才会被操作
 func CheckFile(file os.FileInfo) bool {
+	if StrContain(file.Name(), ignoreFiles) {
+		return false
+	}
 	ext := path.Ext(file.Name())
 	if strings.EqualFold(ext, ".md") && !strings.EqualFold(file.Name(), "readme.md") {
 		return true
+	}
+	return false
+}
+
+func StrContain(str string, slice []string) bool {
+	for _, v := range slice {
+		if str == v {
+			return true
+		}
 	}
 	return false
 }
